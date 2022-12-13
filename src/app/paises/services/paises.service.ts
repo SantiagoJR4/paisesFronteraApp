@@ -1,6 +1,6 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
-import { Observable, of } from 'rxjs';
+import { combineLatest, Observable, of } from 'rxjs';
 import { Country } from '../interfaces/country.interface';
 import { PaisSmall } from '../interfaces/paises.interface';
 
@@ -36,5 +36,25 @@ export class PaisesService {
     return this.http.get<Country>(url);
   }
 
+  getPaisPorCodigoSmall(codigo:string):Observable<PaisSmall>{
+    const url = `${this.baseUrl}/alpha/${codigo}?fields=name,cca3`;
+    return this.http.get<PaisSmall>(url);
+  }
+
+  getPaisesPorCodigos(borders:string[]): Observable<PaisSmall[]>{
+    if(!borders){
+      return of ([]);
+    }
+
+    const peticiones: Observable<PaisSmall>[] = [];
+
+    borders.forEach(codigo => {
+      const peticion=this.getPaisPorCodigoSmall(codigo);
+      peticiones.push(peticion);
+    });
+
+    return combineLatest(peticiones);
+
+  }
 
 }
